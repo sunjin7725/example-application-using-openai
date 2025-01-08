@@ -2,6 +2,8 @@
 This file is used to ask a question to a pdf file.
 '''
 
+from typing import List
+
 from client import OpenAIClient, RedisClient
 
 
@@ -28,12 +30,12 @@ def get_intent(query: str) -> str:
     ])
     return response
 
-def generate_response(facts: list[str], intent: str, question: str) -> str:
+def generate_response(facts: List[str], intent: str, question: str) -> str:
     '''
     This function is used to generate a response to a question.
 
     Args:
-        facts: list[str]: The facts to use to generate the response.
+        facts: List[str]: The facts to use to generate the response.
         intent: str: The intent of the question.
         question: str: The question to generate a response to.
     Returns:

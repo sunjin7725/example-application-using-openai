@@ -29,7 +29,7 @@ class Embedding:
     This class is a data class for storing embeddings.
     '''
     id: str
-    vector: list[float]
+    vector: List[float]
     text: str
 
     def to_dict(self):
@@ -91,7 +91,7 @@ class OpenAIClient:
                 Iterable[Iterable[int]]
             ],
             model: str = EMBED_MODEL
-    ) -> list[Embedding]:
+    ) -> List[Embedding]:
         '''
         This method is used to generate embeddings for the input.
 
@@ -118,7 +118,7 @@ class OpenAIClient:
             ) for value in response.data
         ]
 
-    def pdf_to_embeddings(self, pdf_path: str, chunk_size: int = 1000) -> list[Embedding]:
+    def pdf_to_embeddings(self, pdf_path: str, chunk_size: int = 1000) -> List[Embedding]:
         '''
         This method is used to generate embeddings for the input.
 
@@ -151,7 +151,7 @@ class RedisClient:
         self.client = redis.Redis(host=host, port=port)
 
     def embeddings_to_redis(self,
-                            embeddings: list[Embedding],
+                            embeddings: List[Embedding],
                             index_name: str = 'zelda_embeddings'):
         '''
         This method is used to store the embeddings in Redis Search.
@@ -198,14 +198,16 @@ class RedisClient:
         print(f"Loaded {self.client.info()['db0']['keys']} "
               f"documents in Redis Search index {index_name}")
 
-    def search_redis(self,
-                     query: str,
-                     index_name: str = 'zelda_embeddings',
-                     vector_field: str = 'vector',
-                     return_fields: Iterable[str] = ('text', 'score',),
-                     k: int = 5,
-                     print_results: bool = False,
-                     ):
+    def search_redis(
+            self,
+            query: str,
+            *,
+            index_name: str = 'zelda_embeddings',
+            vector_field: str = 'vector',
+            return_fields: Iterable[str] = ('text', 'score',),
+            k: int = 5,
+            print_results: bool = False,
+    ):
         '''
         This method is used to search the embeddings in Redis Search.
 

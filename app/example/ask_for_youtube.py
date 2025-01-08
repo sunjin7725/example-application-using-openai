@@ -1,14 +1,14 @@
 '''
 This file is used to ask a question to a youtube video.
 '''
-from typing import Iterable
+from typing import Iterable, List
 
 from youtube_transcript_api import YouTubeTranscriptApi
 
 from client import OpenAIClient
 
 
-def get_youtube_transcript(video_id: str, languages: Iterable[str] = ("ko",)) -> list[dict]:
+def get_youtube_transcript(video_id: str, languages: Iterable[str] = ("ko",)) -> List[dict]:
     '''
     This function is used to get the transcript of a youtube video.
 
@@ -16,7 +16,7 @@ def get_youtube_transcript(video_id: str, languages: Iterable[str] = ("ko",)) ->
         video_id: str: The id of the youtube video.
         languages: Iterable[str]: The languages to get the transcript in.
     Returns:
-        list[dict]: The transcript of the youtube video.
+        List[dict]: The transcript of the youtube video.
     '''
     return YouTubeTranscriptApi.get_transcript(video_id, languages=languages)
 
