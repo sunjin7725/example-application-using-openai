@@ -215,7 +215,8 @@ class RedisClient:
             query: str: The query to search for.
             index_name: str: The name of the index to search in(default: 'zelda_embeddings').
             vector_field: str: The name of the vector field to search in(default: 'vector').
-            return_fields: Iterable[str]: The fields to return from the search(default: ['text', 'score']).
+            return_fields: Iterable[str]: The fields to return from the search
+                (default: ['text', 'score']).
             k: int: The number of results to return(default: 5).
             print_results: bool: Whether to print the results(default: False).
         Returns:
