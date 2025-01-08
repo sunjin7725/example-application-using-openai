@@ -67,7 +67,7 @@ class OpenAIClient:
             self.client.close()
             self.client = None
 
-    def chat(self, messages: list[dict]) -> str:
+    def chat(self, messages: List[dict]) -> str:
         '''
         This method is used to send a message to the OpenAI API and return the response.
         
@@ -207,7 +207,7 @@ class RedisClient:
             return_fields: Iterable[str] = ('text', 'score',),
             k: int = 5,
             print_results: bool = False,
-    ):
+    ) -> List[str]:
         '''
         This method is used to search the embeddings in Redis Search.
 
@@ -215,11 +215,11 @@ class RedisClient:
             query: str: The query to search for.
             index_name: str: The name of the index to search in(default: 'zelda_embeddings').
             vector_field: str: The name of the vector field to search in(default: 'vector').
-            return_fields: list: The fields to return from the search(default: ['text', 'score']).
+            return_fields: Iterable[str]: The fields to return from the search(default: ['text', 'score']).
             k: int: The number of results to return(default: 5).
             print_results: bool: Whether to print the results(default: False).
         Returns:
-            list[str]: The results from the search.
+            List[str]: The results from the search.
         '''
         openai_client = OpenAIClient()
         embedding_query = openai_client.embeddings(query).data[0].embedding
