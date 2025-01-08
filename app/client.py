@@ -195,7 +195,8 @@ class RedisClient:
             embedding.vector = np.array(embedding.vector, dtype=np.float32).tobytes()
             self.client.hset(key, mapping=embedding.to_dict())
 
-        print(f"Loaded {self.client.info()['db0']['keys']} documents in Redis Search index {index_name}")
+        print(f"Loaded {self.client.info()['db0']['keys']} "
+              f"documents in Redis Search index {index_name}")
 
     def search_redis(self,
                      query: str,

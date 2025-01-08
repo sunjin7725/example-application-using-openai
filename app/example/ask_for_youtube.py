@@ -31,7 +31,7 @@ def get_youtube_summary(video_id: str, question: str) -> str:
         str: The summary of the youtube video.
     '''
     transcript = get_youtube_transcript(video_id)
-    text_list = [f"{t["start"]}s: {t["text"]}" for t in transcript]
+    text_list = [f"{t.get('start')}s: {t.get('text')}" for t in transcript]
     text = " ".join(text_list)
 
     client = OpenAIClient()
