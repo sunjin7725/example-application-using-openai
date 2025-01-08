@@ -1,6 +1,6 @@
-'''
+"""
 This file is used to test the ask_for_pdf function.
-'''
+"""
 
 from client import RedisClient, OpenAIClient
 from example.ask_for_pdf import get_intent, generate_response
@@ -17,8 +17,10 @@ if __name__ == "__main__":
     facts = redis_client.search_redis(intent)
 
     print(len(facts))
-    print(f"""
+    print(
+        f"""
         INTENT: {intent}
         FACTS: {facts}
-    """)
+    """
+    )
     print(generate_response(facts, intent, QUESTION))
