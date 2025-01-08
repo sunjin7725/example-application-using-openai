@@ -17,6 +17,7 @@ from PyPDF2 import PdfReader
 from redis.commands.search.query import Query
 from redis.commands.search.field import TextField, VectorField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
+from redis.exceptions import ResponseError
 from settings import secret_path
 
 EMBED_MODEL = 'text-embedding-3-small'
@@ -80,14 +81,28 @@ class OpenAIClient:
             messages=messages,
         )
         return completion.choices[0].message.content
-    
-    def embeddings(self, text_input: Union[str, List[str], Iterable[int], Iterable[Iterable[int]]], model: str = EMBED_MODEL) ->:
+
+    def embeddings(
+            self,
+            text_input: Union[
+                str,
+                List[str],
+                Iterable[int],
+                Iterable[Iterable[int]]
+            ],
+            model: str = EMBED_MODEL
+    ) -> list[Embedding]:
         '''
         This method is used to generate embeddings for the input.
 
         Args:
-            text_input: Union[str, List[str], Iterable[int], Iterable[Iterable[int]]]: The input to generate embeddings for.
-            model: str: The model to use for generating embeddings.
+            text_input: Union[
+                str, 
+                List[str], 
+                Iterable[int], 
+                Iterable[Iterable[int]]
+                ]: The input to generate embeddings for.
+            model: str: The model to use for generating embeddings(default: EMBED_MODEL).
         Returns:
             list[Embedding]: The embeddings for the input.
         '''
@@ -102,14 +117,14 @@ class OpenAIClient:
                 text=text_input[value.index]
             ) for value in response.data
         ]
-    
+
     def pdf_to_embeddings(self, pdf_path: str, chunk_size: int = 1000) -> list[Embedding]:
         '''
         This method is used to generate embeddings for the input.
 
         Args:
             pdf_path: str: The path to the PDF file.
-            chunk_size: int: The size of the chunks to split the PDF into.
+            chunk_size: int: The size of the chunks to split the PDF into(default: 1000).
         Returns:
             list[Embedding]: The embeddings for the input.
         '''
@@ -135,13 +150,16 @@ class RedisClient:
 
         self.client = redis.Redis(host=host, port=port)
 
-    def embeddings_to_redis(self, embeddings: list[Embedding], index_name: str = 'zelda_embeddings'):
+    def embeddings_to_redis(self,
+                            embeddings: list[Embedding],
+                            index_name: str = 'zelda_embeddings'):
         '''
         This method is used to store the embeddings in Redis Search.
 
         Args:
             embeddings: list[Embedding]: The embeddings to store in Redis Search.
             index_name: str: The name of the index to store the embeddings in.
+                (default: 'zelda_embeddings')
         Returns:
             None
         '''
@@ -149,7 +167,7 @@ class RedisClient:
         vector_num = len(embeddings)
 
         text = TextField('text')
-        text_embedding = VectorField('vector', 
+        text_embedding = VectorField('vector',
                                      'FLAT', {
                                         'TYPE': 'FLOAT32',
                                         'DIM': vector_dim,
@@ -161,7 +179,7 @@ class RedisClient:
         try:
             self.client.ft(index_name).info()
             print(f"Index {index_name} already exists")
-        except:
+        except ResponseError:
             print(f"Index {index_name} does not exist, creating...")
             self.client.ft(index_name).create_index(
                 fields=fields,
@@ -179,11 +197,11 @@ class RedisClient:
 
         print(f"Loaded {self.client.info()['db0']['keys']} documents in Redis Search index {index_name}")
 
-    def search_redis(self, 
-                     query: str, 
+    def search_redis(self,
+                     query: str,
                      index_name: str = 'zelda_embeddings',
                      vector_field: str = 'vector',
-                     return_fields: list = ['text', 'score'],
+                     return_fields: Iterable[str] = ('text', 'score',),
                      k: int = 5,
                      print_results: bool = False,
                      ):
@@ -223,4 +241,3 @@ class RedisClient:
                 print(f"{i}. {doc.text} (Score: {round(doc.score, 3)})")
 
         return [doc.text for doc in results.docs]
-
