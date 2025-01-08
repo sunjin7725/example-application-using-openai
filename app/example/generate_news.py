@@ -1,6 +1,22 @@
+'''
+This file is used to generate news articles.
+'''
+
 from client import OpenAIClient
 
+
 def assist_jounalist(facts: list[str], tone: str, length_words: int, style: str) -> str:
+    '''
+    This function is used to assist the journalist.
+
+    Args:
+        facts: list[str]: The facts to write the article about.
+        tone: str: The tone of the article.
+        length_words: int: The length of the article in words.
+        style: str: The style of the article.
+    Returns:
+        str: The article.
+    '''
     client = OpenAIClient()
 
     facts = ", ".join(facts)
@@ -23,4 +39,3 @@ def assist_jounalist(facts: list[str], tone: str, length_words: int, style: str)
             "content": prompt
         }
     ])
-

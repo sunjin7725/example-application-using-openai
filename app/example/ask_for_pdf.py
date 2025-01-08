@@ -1,8 +1,19 @@
-import os 
+'''
+This file is used to ask a question to a pdf file.
+'''
 
 from client import OpenAIClient, RedisClient
 
-def get_intent(query: str):
+
+def get_intent(query: str) -> str:
+    '''
+    This function is used to get the intent of a query.
+
+    Args:
+        query: str: The query to get the intent of.
+    Returns:
+        str: The intent of the query.
+    '''
     client = OpenAIClient()
 
     response = client.chat([
@@ -17,7 +28,17 @@ def get_intent(query: str):
     ])
     return response
 
-def generate_response(facts: list[str], intent: str, question: str):
+def generate_response(facts: list[str], intent: str, question: str) -> str:
+    '''
+    This function is used to generate a response to a question.
+
+    Args:
+        facts: list[str]: The facts to use to generate the response.
+        intent: str: The intent of the question.
+        question: str: The question to generate a response to.
+    Returns:
+        str: The response to the question.
+    '''
     client = OpenAIClient()
 
     response = client.chat([
@@ -34,7 +55,13 @@ def generate_response(facts: list[str], intent: str, question: str):
     ])
     return response
 
-def load_pdf(pdf_path: str):
+def load_pdf(pdf_path: str) -> None:
+    '''
+    This function is used to load a pdf file into the redis database.
+
+    Args:
+        pdf_path: str: The path to the pdf file to load.
+    '''
     redis_client = RedisClient()
     openai_client = OpenAIClient()
 

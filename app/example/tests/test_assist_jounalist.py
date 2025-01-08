@@ -1,3 +1,7 @@
+'''
+This file is used to test the generate_news function.
+'''
+
 from example.generate_news import assist_jounalist
 
 

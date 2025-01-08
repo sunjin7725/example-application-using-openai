@@ -1,26 +1,45 @@
+'''
+This file is a client for the OpenAI API and Redis Search.
+OpenAI API is used for generating embeddings and chat completions.
+Redis Search is used for storing and querying embeddings.
+'''
+
+from dataclasses import dataclass
+from typing import Union, List, Iterable
+
 import yaml
 import redis
 import numpy as np
 
 from openai import OpenAI
 from PyPDF2 import PdfReader
-from dataclasses import dataclass
-from typing import Union, List, Iterable
+
 from redis.commands.search.query import Query
 from redis.commands.search.field import TextField, VectorField
 from redis.commands.search.indexDefinition import IndexDefinition, IndexType
-
-
 from settings import secret_path
 
 EMBED_MODEL = 'text-embedding-3-small'
+
+
 @dataclass
 class Embedding:
+    '''
+    This class is a data class for storing embeddings.
+    '''
     id: str
     vector: list[float]
     text: str
 
     def to_dict(self):
+        '''
+        This method is used to convert the embedding to a dictionary.
+        
+        Args:
+            None
+        Returns:
+            dict: The embedding as a dictionary.
+        '''
         return {
             'id': self.id,
             'vector': self.vector,
@@ -29,8 +48,11 @@ class Embedding:
 
 
 class OpenAIClient:
+    '''
+    This class is a client for the OpenAI API.
+    '''
     def __init__(self):
-        with open(secret_path, 'r') as f:
+        with open(secret_path, 'r', encoding='utf-8') as f:
             __secret = yaml.safe_load(f)
         __api_key = __secret['openai']['api_key']
 
@@ -45,19 +67,52 @@ class OpenAIClient:
             self.client = None
 
     def chat(self, messages: list[dict]) -> str:
+        '''
+        This method is used to send a message to the OpenAI API and return the response.
+        
+        Args:
+            messages: list[dict]: The messages to send to the OpenAI API.
+        Returns:
+            str: The response message from the OpenAI API.
+        '''
         completion = self.client.chat.completions.create(
             model=self.model,
             messages=messages,
         )
         return completion.choices[0].message.content
     
-    def embeddings(self, input: Union[str, List[str], Iterable[int], Iterable[Iterable[int]]], model: str = EMBED_MODEL):
-        return self.client.embeddings.create(
+    def embeddings(self, text_input: Union[str, List[str], Iterable[int], Iterable[Iterable[int]]], model: str = EMBED_MODEL) ->:
+        '''
+        This method is used to generate embeddings for the input.
+
+        Args:
+            text_input: Union[str, List[str], Iterable[int], Iterable[Iterable[int]]]: The input to generate embeddings for.
+            model: str: The model to use for generating embeddings.
+        Returns:
+            list[Embedding]: The embeddings for the input.
+        '''
+        response = self.client.embeddings.create(
             model=model,
-            input=input,
+            input=text_input,
         )
+        return [
+            Embedding(
+                id=value.index,
+                vector=value.embedding,
+                text=text_input[value.index]
+            ) for value in response.data
+        ]
     
     def pdf_to_embeddings(self, pdf_path: str, chunk_size: int = 1000) -> list[Embedding]:
+        '''
+        This method is used to generate embeddings for the input.
+
+        Args:
+            pdf_path: str: The path to the PDF file.
+            chunk_size: int: The size of the chunks to split the PDF into.
+        Returns:
+            list[Embedding]: The embeddings for the input.
+        '''
         pdf_reader = PdfReader(pdf_path)
         chunks = []
         for page in pdf_reader.pages:
@@ -65,18 +120,14 @@ class OpenAIClient:
             chunks.extend([text[i:i+chunk_size] for i in range(0, len(text), chunk_size)])
 
         response = self.embeddings(chunks)
-
-        return [
-            Embedding(
-                id=value.index,
-                vector=value.embedding,
-                text=chunks[value.index]
-            ) for value in response.data
-        ]
+        return response
 
 class RedisClient:
+    '''
+    This class is a client for the Redis Search.
+    '''
     def __init__(self):
-        with open(secret_path, 'r') as f:
+        with open(secret_path, 'r', encoding='utf-8') as f:
             __secret = yaml.safe_load(f)
         redis_conf = __secret['redis']
         host = redis_conf['host']
@@ -85,6 +136,15 @@ class RedisClient:
         self.client = redis.Redis(host=host, port=port)
 
     def embeddings_to_redis(self, embeddings: list[Embedding], index_name: str = 'zelda_embeddings'):
+        '''
+        This method is used to store the embeddings in Redis Search.
+
+        Args:
+            embeddings: list[Embedding]: The embeddings to store in Redis Search.
+            index_name: str: The name of the index to store the embeddings in.
+        Returns:
+            None
+        '''
         vector_dim = len(embeddings[0].vector)
         vector_num = len(embeddings)
 
@@ -127,7 +187,19 @@ class RedisClient:
                      k: int = 5,
                      print_results: bool = False,
                      ):
-        
+        '''
+        This method is used to search the embeddings in Redis Search.
+
+        Args:
+            query: str: The query to search for.
+            index_name: str: The name of the index to search in(default: 'zelda_embeddings').
+            vector_field: str: The name of the vector field to search in(default: 'vector').
+            return_fields: list: The fields to return from the search(default: ['text', 'score']).
+            k: int: The number of results to return(default: 5).
+            print_results: bool: Whether to print the results(default: False).
+        Returns:
+            list[str]: The results from the search.
+        '''
         openai_client = OpenAIClient()
         embedding_query = openai_client.embeddings(query).data[0].embedding
 

@@ -1,0 +1,5 @@
+numpy
+redis
+openai
+PyPDF2
+pyyaml
