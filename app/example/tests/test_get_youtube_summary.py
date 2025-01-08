@@ -1,8 +1,14 @@
-from example.youtube_summary import get_youtube_summary
+from example.ask_for_youtube import get_youtube_summary
+
 
 if __name__ == "__main__":
-    # print(get_youtube_summary("KCuCsVExdLM"))
-    test = get_youtube_summary("KCuCsVExdLM")
-    # test = get_youtube_summary(video_id="0e2RPUMygEw")
+    # video_id = "KCuCsVExdLM" # 풍월량 패오엑2 영상
+    video_id = "XjwZUSqkz3Y" # 착맨 패오엑2 1장 풀영상
+
+    question = """
+        이 영상에서 제일 재밌는 부분이 어딘지 알려줘. 시분초 포맷으로 그 부분의 시간도 알려줘야돼.
+    """
+    
+    test = get_youtube_summary(video_id, question)
     print(len(test))
     print(test)
