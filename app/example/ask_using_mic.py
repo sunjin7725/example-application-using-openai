@@ -2,7 +2,7 @@
 This is an example of how to use the OpenAI API to ask a question using a microphone.
 """
 
-from typing import List
+from typing import Iterable
 
 import whisper
 import gradio as gr
@@ -67,7 +67,9 @@ class Chat:
     """
 
     def __init__(
-        self, state: str = "START", history: List[dict] = [{"role": "user", "content": STARTING_PROMPT}]
+        self,
+        state: str = "START",
+        history: Iterable[dict] = ({"role": "user", "content": STARTING_PROMPT},),
     ) -> None:
         self.previous_state = None
         self.state = state
@@ -158,8 +160,6 @@ class Chat:
                 self.reset()
             elif self.state != "EXIT":
                 self.reset_to_previous_state()
-            else:
-                return
             return response
 
     def discuss_from_audio(self, file):
