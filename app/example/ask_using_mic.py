@@ -6,7 +6,6 @@ from typing import List
 
 import whisper
 import gradio as gr
-import streamlit as st
 
 from client import OpenAIClient
 
