@@ -2,10 +2,11 @@
 This is an example of how to use the OpenAI API to ask a question using a microphone.
 """
 
-from typing import Iterable
+from typing import List
 
 import whisper
 import gradio as gr
+import streamlit as st
 
 from client import OpenAIClient
 
@@ -69,11 +70,17 @@ class Chat:
     def __init__(
         self,
         state: str = "START",
-        history: Iterable[dict] = ({"role": "user", "content": STARTING_PROMPT},),
+        history: List[dict] = None,
     ) -> None:
         self.previous_state = None
         self.state = state
-        self.history = history
+        self.history = (
+            history
+            if history is not None
+            else [
+                {"role": "user", "content": STARTING_PROMPT},
+            ]
+        )
         self.client = OpenAIClient()
         self.stt_model = whisper.load_model("base")
 
@@ -192,9 +199,21 @@ if __name__ == "__main__":
     # ).launch()
 
     # 텍스트 모드
-    gr.Interface(
-        theme=gr.themes.Soft(),
-        fn=chat.discuss,
-        inputs=gr.Textbox(placeholder="Enter your message here..."),
-        outputs="text",
-    ).launch()
+    st.title("Chat with AI")
+
+    if "chat_history" not in st.session_state:
+        st.session_state.chat_history = []
+
+    for content in st.session_state.chat_history:
+        with st.chat_message(content["role"]):
+            st.markdown(content["message"])
+
+    prompt = st.chat_input("메시지를 입력하세요")
+    if prompt:
+        with st.chat_message("user"):
+            st.markdown(prompt)
+            st.session_state.chat_history.append({"role": "user", "message": prompt})
+        with st.chat_message("assistant", avatar="🤖"):
+            response = chat.discuss(prompt)
+            st.markdown(response)
+            st.session_state.chat_history.append({"role": "assistant", "message": response})
