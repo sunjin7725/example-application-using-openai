@@ -4,3 +4,5 @@ openai
 PyPDF2
 pyyaml
 youtube_transcript_api
+openai-whisper
+gradio

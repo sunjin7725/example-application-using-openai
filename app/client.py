@@ -97,13 +97,10 @@ class OpenAIClient:
         Returns:
             list[Embedding]: The embeddings for the input.
         """
-        response = self.client.embeddings.create(
+        return self.client.embeddings.create(
             model=model,
             input=text_input,
         )
-        return [
-            Embedding(id=value.index, vector=value.embedding, text=text_input[value.index]) for value in response.data
-        ]
 
     def pdf_to_embeddings(
         self,
@@ -126,7 +123,7 @@ class OpenAIClient:
             chunks.extend([text[i : i + chunk_size] for i in range(0, len(text), chunk_size)])
 
         response = self.embeddings(chunks)
-        return response
+        return [Embedding(id=value.index, vector=value.embedding, text=chunks[value.index]) for value in response.data]
 
 
 class RedisClient:
